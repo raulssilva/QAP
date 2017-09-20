@@ -2,7 +2,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
-//#include <iostream>
+#include <climits>
+#include "Hungarian.cpp"
 
 using namespace std;
 
@@ -101,10 +102,10 @@ int gilmore_lawlerBound(vector< vector<int> > a, vector< vector<int> > b){
 		reverse(b[i].begin(), b[i].end());
 	}
 
-	vector< vector<int> > g;
+	vector< vector<double> > g;
 	for(int i = 0; i < a.size(); i++){
 		vector<int> a_i = a[i];
-		vector<int> line;
+		vector<double> line;
 		for(int j = 0; j < b.size(); j++){
 			vector<int> b_i = b[j];
 			int scalar = 0;
@@ -116,20 +117,19 @@ int gilmore_lawlerBound(vector< vector<int> > a, vector< vector<int> > b){
 		g.push_back(line);
 	}
 
-	// for(int i = 0; i < a.size(); i++){
-	// 	for(int j = 0; j < a.size(); j++){
-	// 		printf("%i ", g[i][j]);
-	// 	}
-	// 	printf("\n");
-	// }
+	// https://github.com/mcximing/hungarian-algorithm-cpp
+	HungarianAlgorithm HungAlgo;
+	vector<int> assignment;
+	int cost = HungAlgo.Solve(g, assignment);
+	printf("%i\n", cost);
 }
 
 int main(int argc, char* argv[]){
 	readInstance(argv[1]);
 //	printInstance();
-	// vector< vector<int> > a{{25, 13, 28}, {28, 15, 4}, {23, 15, 25}, {4, 13, 23}};
-	// vector< vector<int> > b{{2, 6, 7}, {6, 6, 5}, {7, 5, 1}, {6, 2, 1}};
+	vector< vector<int> > a{{25, 13, 28}, {28, 15, 4}, {23, 15, 25}, {4, 13, 23}};
+	vector< vector<int> > b{{2, 6, 7}, {6, 6, 5}, {7, 5, 1}, {6, 2, 1}};
 
-	// gilmore_lawlerBound(a, b);
+	 gilmore_lawlerBound(a, b);
 	return 0;
 }
