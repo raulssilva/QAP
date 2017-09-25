@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <fstream>
 #include <vector>
 #include <algorithm>
@@ -7,7 +9,7 @@
 
 using namespace std;
 
-int n;
+int n = 10;
 vector< vector<int> > flowMatrix;
 vector< vector<int> > distanceMatrix;
 
@@ -121,15 +123,97 @@ int gilmore_lawlerBound(vector< vector<int> > a, vector< vector<int> > b){
 	HungarianAlgorithm HungAlgo;
 	vector<int> assignment;
 	int cost = HungAlgo.Solve(g, assignment);
-	printf("%i\n", cost);
+	// printf("%i\n", cost);
+	return cost;
+}
+
+int getCost(vector<int> solution){
+	int cost = 0;
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
+			cost += flowMatrix[i][j] * distanceMatrix[solution[i]-1][solution[j]-1];
+		}
+	}
+
+	return cost;
+}
+
+int getBestSolution(vector<int> &solution){
+	vector<int> swapSolution;
+	int bestCost = getCost(solution);
+
+	for(int i = 0; i < n; i++){
+		swapSolution.push_back(solution[i]);
+	}
+
+	for(int i = 0; i < n; i++){
+		for(int j = i+1; j < n; j++){
+			int aux = swapSolution[i];
+			swapSolution[i] = swapSolution[j];
+			swapSolution[j] = aux;
+
+			int swapSolutionCost = getCost(swapSolution);
+			if(bestCost > swapSolutionCost){
+				for(int i = 0; i < n; i++){
+					solution[i] = swapSolution[i];
+				}
+				bestCost = swapSolutionCost;
+			}else{
+				aux = swapSolution[i];
+				swapSolution[i] = swapSolution[j];
+				swapSolution[j] = aux;
+			}
+		}
+	}
+	printf("%i\n", bestCost);
+	return bestCost;
+}
+
+int randomSolution(vector<int> &solution){
+	
+	for(int i = 1; i <= n; i++){
+		solution.push_back(i);
+	}
+
+	for(int i = 0; i < n; i++){
+		int randomIndex = i + rand()%(n-i);
+		int aux = solution[i];
+		solution[i] = solution[randomIndex];
+		solution[randomIndex] = aux;
+	}
+
+	return getCost(solution);
+}
+
+int upperBound(){
+	vector<int> solution;
+
+	int cost = randomSolution(solution);
+	//printf("%i\n", cost);
+	// for(int i = 0; i < n; i++){
+	// 	printf("%i ", solution[i]);
+	// }
+	// printf("\n");
+
+	cost = getBestSolution(solution);
+
+	// for(int i = 0; i < n; i++){
+	// 	printf("%i ", solution[i]);
+	// }
+	// printf("\n");
+
+	return cost;
 }
 
 int main(int argc, char* argv[]){
 	readInstance(argv[1]);
-//	printInstance();
-	vector< vector<int> > a{{25, 13, 28}, {28, 15, 4}, {23, 15, 25}, {4, 13, 23}};
-	vector< vector<int> > b{{2, 6, 7}, {6, 6, 5}, {7, 5, 1}, {6, 2, 1}};
+	srand(time(NULL));
+	upperBound();
 
-	 gilmore_lawlerBound(a, b);
+	//printInstance();
+//	vector< vector<int> > a{{25, 13, 28}, {28, 15, 4}, {23, 15, 25}, {4, 13, 23}};
+//	vector< vector<int> > b{{2, 6, 7}, {6, 6, 5}, {7, 5, 1}, {6, 2, 1}};
+
+//	gilmore_lawlerBound(a, b);
 	return 0;
 }
