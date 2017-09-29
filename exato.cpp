@@ -215,14 +215,8 @@ void upperBound(){
 
 }
 
-void branchAndBound(vector< vector<int> > fMatrix, vector< vector<int> > dMatrix, vector<int> solution, int minCost, int facility){
-	for(int i = 0; i < n; i++){
-		
-		if(solution[i] != 0){
-			continue;
-		}
-
-		solution[i] = facility;
+void branchAndBound(vector< vector<int> > fMatrix, vector< vector<int> > dMatrix, vector<int> solution, int minCost, int index){
+	for(int i = index; i < n; i++){
 
 		vector< vector<int> > fM;
 		vector< vector<int> > dM;
@@ -231,16 +225,18 @@ void branchAndBound(vector< vector<int> > fMatrix, vector< vector<int> > dMatrix
 			vector<int> fV;
 			vector<int> dV;
 			for(int k = 0; k < n; k++){
-				if(j != facility && k != facility){
-					fV.push_back(fMatrix[j][k]);
-				}else{
-					fV.push_back(0);
+				if(j != solution[i]-1 && k != solution[i]-1){
+					fV.push_back(flowMatrix[j][k]);
 				}
+				// }else{
+				// 	fV.push_back(0);
+				// }
 				if(j != i && k != i){
-					dV.push_back(dMatrix[i][j]);
-				}else{
-					dV.push_back(0);
+					dV.push_back(distanceMatrix[j][k]);
 				}
+				// }else{
+				// 	dV.push_back(0);
+				// }
 			}
 
 			if(fV.size() != 0){
@@ -251,35 +247,47 @@ void branchAndBound(vector< vector<int> > fMatrix, vector< vector<int> > dMatrix
 			}
 		}
 
-		int cost = gilmore_lawlerBound(fM, dM) + minCost;
+		int cost = gilmore_lawlerBound(fM, dM);// + newMaxCost;
 		printf("Min: %i Max: %i\n", cost, maxCost);
-		
-		if(facility == n){
-			printf("AQUI\n");
-			// int newMaxCost = getCost(solution);
-			// if(newMaxCost < maxCost){
-			// 	maxCost = newMaxCost;
-			// }
-		}else{
-			if(cost < maxCost){
-				branchAndBound(fM, dM, solution, cost,facility++);
-			}
-			solution[i] = 0;
+
+		printf("[");
+		for(int j = 0; j < solution.size(); j++){
+			printf("%i, ", solution[j]);
 		}
+		printf("]\n");
+
+		//printf("AQUI\n");
+
+		if(cost > maxCost - minCost){
+			int aux = solution[index];
+			solution[index] = solution[i];
+			solution[i] = aux;
+		}else{
+			int newMaxCost = getCost(solution);
+			if(newMaxCost < maxCost){
+				maxCost = newMaxCost;
+			}
+		}
+
+		branchAndBound(fM, dM, solution, cost, index+1);
+		int aux = solution[index];
+			solution[index] = solution[i];
+			solution[i] = aux;
 	}
 }
 
 int main(int argc, char* argv[]){
 	readInstance(argv[1]);
 	srand(time(NULL));
-
+	
 	vector<int> solution;
+	//vector<int> solution{8,1,6,2,11,10,3,5,9,7,12,4};
 	for(int i = 0; i < n; i++){
-		solution.push_back(0);
+		solution.push_back(i+1);
 	}
 
 	upperBound();
-	branchAndBound(flowMatrix, distanceMatrix, solution, 0, 1);
+	branchAndBound(flowMatrix, distanceMatrix, solution, 0, 0);
 
 	//printInstance();
 	// vector< vector<int> > a{{25, 13, 28}, {28, 15, 4}, {23, 15, 25}, {4, 13, 23}};
