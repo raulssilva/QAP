@@ -29,8 +29,8 @@ void readInstance(char* fileName){
 					fileData >> x;
 					line.push_back(x);
 				}
-				
-				flowMatrix.push_back(line);
+
+				distanceMatrix.push_back(line);
 			}
 			
 			for(int i = 0; i < n; i++){
@@ -40,8 +40,8 @@ void readInstance(char* fileName){
 					fileData >> x;
 					line.push_back(x);
 				}
-				
-				distanceMatrix.push_back(line);
+
+				flowMatrix.push_back(line);
 			}
 		}
 	}
@@ -124,18 +124,8 @@ int gilmore_lawlerBound(vector< vector<int> > a, vector< vector<int> > b){
 	// https://github.com/mcximing/hungarian-algorithm-cpp
 	HungarianAlgorithm HungAlgo;
 	vector<int> assignment;
-
-	// for(int i = 0; i < n; i++){
-	// 	for(int j = 0; j < n; j++){
-	// 		printf("%i ", (int)g[i].size());
-	// 	}
-	// 	printf("\n");
-	// }
-
-	//printf("%i\n", g.size());
-
 	int cost = HungAlgo.Solve(g, assignment);
-	// printf("%i\n", cost);
+
 	return cost;
 }
 
@@ -143,7 +133,7 @@ int getCost(vector<int> solution){
 	int cost = 0;
 	for(int i = 0; i < n; i++){
 		for(int j = 0; j < n; j++){
-			cost += flowMatrix[i][j] * distanceMatrix[solution[i]-1][solution[j]-1];
+			cost += flowMatrix[solution[i]-1][solution[j]-1] * distanceMatrix[i][j];
 		}
 	}
 
@@ -177,7 +167,7 @@ int getBestSolution(vector<int> &solution){
 			}
 		}
 	}
-	//printf("%i\n", bestCost);
+
 	return bestCost;
 }
 
@@ -199,80 +189,78 @@ void upperBound(){
 	vector<int> solution;
 
 	randomSolution(solution);
-	//printf("%i\n", cost);
-	// for(int i = 0; i < n; i++){
-	// 	printf("%i ", solution[i]);
-	// }
-	// printf("\n");
 
 	maxCost = getBestSolution(solution);
 
 	for(int i = 0; i < n; i++){
 		bestSolution.push_back(solution[i]);
-	//	printf("%i ", solution[i]);
 	}
-	// printf("\n");
-
 }
 
 void branchAndBound(vector< vector<int> > fMatrix, vector< vector<int> > dMatrix, vector<int> solution, int minCost, int index){
-	for(int i = index; i < n; i++){
-
-		vector< vector<int> > fM;
-		vector< vector<int> > dM;
-
-		for(int j = 0; j < n; j++){
-			vector<int> fV;
-			vector<int> dV;
-			for(int k = 0; k < n; k++){
-				if(j != solution[i]-1 && k != solution[i]-1){
-					fV.push_back(flowMatrix[j][k]);
-				}
-				// }else{
-				// 	fV.push_back(0);
-				// }
-				if(j != i && k != i){
-					dV.push_back(distanceMatrix[j][k]);
-				}
-				// }else{
-				// 	dV.push_back(0);
-				// }
-			}
-
-			if(fV.size() != 0){
-				fM.push_back(fV);
-			}
-			if(dV.size() != 0){
-				dM.push_back(dV);
+	if(index == n-1){
+		int newMaxCost = getCost(solution);
+		if(newMaxCost < maxCost){
+			maxCost = newMaxCost;
+			for(int j = 0; j < n; j++){
+				bestSolution[j] = solution[j];
 			}
 		}
-
-		int cost = gilmore_lawlerBound(fM, dM);// + newMaxCost;
-		printf("Min: %i Max: %i\n", cost, maxCost);
-
-		printf("[");
-		for(int j = 0; j < solution.size(); j++){
-			printf("%i, ", solution[j]);
-		}
-		printf("]\n");
-
-		//printf("AQUI\n");
-
-		if(cost > maxCost - minCost){
+	}else{
+		for(int i = index; i < n; i++){
 			int aux = solution[index];
 			solution[index] = solution[i];
 			solution[i] = aux;
-		}else{
-			int newMaxCost = getCost(solution);
-			if(newMaxCost < maxCost){
-				maxCost = newMaxCost;
-			}
-		}
 
-		branchAndBound(fM, dM, solution, cost, index+1);
-		int aux = solution[index];
+			vector< vector<int> > nSFM; // ot seen flow matrix
+			vector< vector<int> > nSDM; // ot seen distance matrix
+
+			long cost = 0;
+			for(int j = 0; j <= index; j++){
+				for(int k = 0; k <= index; k++){
+					cost += flowMatrix[solution[j]-1][solution[k]-1] * distanceMatrix[j][k];
+					if(cost >= maxCost){
+						return;
+					}
+				}
+			}
+
+			for(int j = index+1; j < n; j++){
+				vector<int> nSFV;
+				vector<int> nSDV;
+
+				for(int k = index+1; k < n; k++){
+					nSFV.push_back(flowMatrix[solution[j]-1][solution[k]-1]);
+					nSDV.push_back(distanceMatrix[j][k]);
+				}
+
+				if(nSFV.size() != 0){
+					nSFM.push_back(nSFV);
+				}
+
+				if(nSDV.size() != 0){
+					nSDM.push_back(nSDV);
+				}
+			}
+
+			cost += gilmore_lawlerBound(nSFM, nSDM);
+
+			// printf("Min: %li Max: %i\n", cost, maxCost);
+
+			// printf("[");
+			// for(int j = 0; j < solution.size(); j++){
+			// 	printf("%i, ", solution[j]);
+			// }
+			// printf("]\n");
+
+			if(cost <= maxCost){
+				branchAndBound(nSFM, nSDM, solution, cost, index+1);
+			}
+
+			aux = solution[index];
 			solution[index] = solution[i];
 			solution[i] = aux;
+		}
 	}
 }
 
@@ -281,7 +269,6 @@ int main(int argc, char* argv[]){
 	srand(time(NULL));
 	
 	vector<int> solution;
-	//vector<int> solution{8,1,6,2,11,10,3,5,9,7,12,4};
 	for(int i = 0; i < n; i++){
 		solution.push_back(i+1);
 	}
@@ -289,10 +276,12 @@ int main(int argc, char* argv[]){
 	upperBound();
 	branchAndBound(flowMatrix, distanceMatrix, solution, 0, 0);
 
-	//printInstance();
-	// vector< vector<int> > a{{25, 13, 28}, {28, 15, 4}, {23, 15, 25}, {4, 13, 23}};
-	// vector< vector<int> > b{{2, 6, 7}, {6, 6, 5}, {7, 5, 1}, {6, 2, 1}};
+	printf("Best Solution = [");
+	for(int i = 0; i < bestSolution.size(); i++){
+		printf("%i, ", bestSolution[i]);
+	}
+	printf("]\n");
+	printf("Cost: %i\n", maxCost);
 
-	// gilmore_lawlerBound(a, b);
 	return 0;
 }
