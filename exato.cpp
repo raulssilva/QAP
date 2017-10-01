@@ -91,11 +91,29 @@ int partition(vector<int> &v, int low, int high){
 }
 
 void quickSort(vector<int> &v, int low, int high){
-	if (low < high){
-		int pi = partition(v, low, high);
 
-		quickSort(v, low, pi - 1);
-		quickSort(v, pi + 1, high);
+	int stack[high - low + 1];
+
+	int top = -1;
+
+	stack[++top] = low;
+	stack[++top] = high;
+ 
+	while(top >= 0){
+		high = stack[top--];
+		low = stack[top--];
+
+		int p = partition(v, low, high);
+ 
+		if(p-1 > low){
+			stack[++top] = low;
+			stack[++top] = p - 1;
+		}
+ 
+		if(p+1 < high){
+			stack[++top] = p + 1;
+			stack[++top] = high;
+		}
 	}
 }
 
