@@ -5,12 +5,15 @@
 #include <vector>
 #include <algorithm>
 #include <climits>
+#include <chrono>
 #include "Hungarian.cpp"
 
+using namespace std::chrono;
 using namespace std;
 
 int n;
-int maxCost;
+int maxCost = INT_MAX;
+steady_clock::time_point t1;
 vector<int> bestSolution;
 vector< vector<int> > flowMatrix;
 vector< vector<int> > distanceMatrix;
@@ -166,6 +169,7 @@ int getBestSolution(vector<int> &solution){
 		swapSolution.push_back(solution[i]);
 	}
 
+	bool flag = false;
 	for(int i = 0; i < n; i++){
 		for(int j = i+1; j < n; j++){
 			int aux = swapSolution[i];
@@ -174,6 +178,7 @@ int getBestSolution(vector<int> &solution){
 
 			int swapSolutionCost = getCost(swapSolution);
 			if(bestCost > swapSolutionCost){
+				flag = true;
 				for(int i = 0; i < n; i++){
 					solution[i] = swapSolution[i];
 				}
@@ -183,6 +188,11 @@ int getBestSolution(vector<int> &solution){
 				swapSolution[i] = swapSolution[j];
 				swapSolution[j] = aux;
 			}
+		}
+
+		if(flag && i == n-1){
+			i = -1;
+			flag = false;
 		}
 	}
 
@@ -206,16 +216,27 @@ void randomSolution(vector<int> &solution){
 void upperBound(){
 	vector<int> solution;
 
-	randomSolution(solution);
-
-	maxCost = getBestSolution(solution);
-
 	for(int i = 0; i < n; i++){
-		bestSolution.push_back(solution[i]);
+		randomSolution(solution);
+		int cost = getBestSolution(solution);
+		
+		if(cost < maxCost){
+			maxCost = cost;
+			for(int i = 0; i < n; i++){
+				bestSolution[i] = solution[i];
+			}
+		}
 	}
 }
 
 void branchAndBound(vector< vector<int> > fMatrix, vector< vector<int> > dMatrix, vector<int> solution, int minCost, int index){
+	steady_clock::time_point t2 = steady_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+
+	if(time_span.count() >= 10800.0){
+		return;
+	}
+
 	if(index == n-1){
 		int newMaxCost = getCost(solution);
 		if(newMaxCost < maxCost){
@@ -289,10 +310,17 @@ int main(int argc, char* argv[]){
 	vector<int> solution;
 	for(int i = 0; i < n; i++){
 		solution.push_back(i+1);
+		bestSolution.push_back(i+1);
 	}
+
+	t1 = steady_clock::now();
 
 	upperBound();
 	branchAndBound(flowMatrix, distanceMatrix, solution, 0, 0);
+
+	steady_clock::time_point t2 = steady_clock::now();
+
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
 	printf("Best Solution = [");
 	for(int i = 0; i < bestSolution.size(); i++){
@@ -300,6 +328,7 @@ int main(int argc, char* argv[]){
 	}
 	printf("]\n");
 	printf("Cost: %i\n", maxCost);
+	printf("Time: %lf seconds.\n", time_span.count());
 
 	return 0;
 }
