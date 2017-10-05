@@ -1,0 +1,6 @@
+Tai12a time: 0.0195111seconds.
+Tai12b time: 2.82574seconds.
+Tai15a time: 10.2206seconds.
+Tai15b time: 3.38177seconds.
+Tai17a time: 123.873seconds.
+Tai20a time: 22031.4seconds.

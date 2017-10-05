@@ -1,0 +1,26 @@
+Para executar o programa, compile da seguinte forma:
+
+g++ -std=c++11 exato.cpp -o exato -O3
+
+E execute da seguinte forma:
+
+./exato Instâncias/"Nome da instância".dat
+
+O resultado será exibido na tela e salvo em arquivo na pasta Instâncias.
+
+
+
+
+
+
+Se preferir, existe um script chamado "script.sh" que executa as instâncias usadas para o problema. Execute-o da seguinte forma:
+
+./script.sh
+
+
+
+
+
+
+================================
+OBS.: O resultados obitidos e exibidos no relatório estão na pasta Resultados.

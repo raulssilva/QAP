@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <climits>
 #include <chrono>
+#include <string>
 #include "Hungarian.cpp"
 
 using namespace std::chrono;
@@ -284,14 +285,6 @@ void branchAndBound(vector< vector<int> > fMatrix, vector< vector<int> > dMatrix
 
 			cost += gilmore_lawlerBound(nSFM, nSDM);
 
-			// printf("Min: %li Max: %i\n", cost, maxCost);
-
-			// printf("[");
-			// for(int j = 0; j < solution.size(); j++){
-			// 	printf("%i, ", solution[j]);
-			// }
-			// printf("]\n");
-
 			if(cost <= maxCost){
 				branchAndBound(nSFM, nSDM, solution, cost, index+1);
 			}
@@ -322,13 +315,23 @@ int main(int argc, char* argv[]){
 
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
+	ofstream output;
+	string x = argv[1];
+	string results = x + "_result.txt";
+	output.open(results);
+
 	printf("Best Solution = [");
+	output << "Best Solution = [";
 	for(int i = 0; i < bestSolution.size(); i++){
 		printf("%i, ", bestSolution[i]);
+		output << bestSolution[i];
 	}
 	printf("]\n");
+	output << "]\n";
 	printf("Cost: %i\n", maxCost);
+	output << "Cost: " << maxCost << "\n";
 	printf("Time: %lf seconds.\n", time_span.count());
+	output << "Time: " << time_span.count() << "seconds.\n";
 
 	return 0;
 }
