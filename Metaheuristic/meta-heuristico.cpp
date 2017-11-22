@@ -6,10 +6,12 @@
 using namespace std;
 
 int n;
-int maxCost;
-vector<int> solution;
+int bestCost;
+int objectiveAvals;
+vector<int> bestSolution;
 vector< vector<int> > flowMatrix;
 vector< vector<int> > distanceMatrix;
+vector< vector<int> > tabooList;
 
 void readInstance(char* fileName){
 	ifstream fileData;
@@ -31,13 +33,16 @@ void readInstance(char* fileName){
 			
 			for(int i = 0; i < n; i++){
 				vector<int> line;
+				vector<int> lists;
 				for(int j = 0; j < n; j++){
 					int x;
 					fileData >> x;
 					line.push_back(x);
+					lists.push_back(0);
 				}
 
 				flowMatrix.push_back(line);
+				tabooList.push_back(lists);
 			}
 		}
 	}
@@ -78,7 +83,9 @@ int getCost(vector<int> solution){
 	return cost;
 }
 
-void generateInitialSolution(){
+vector<int> generateInitialSolution(){
+	vector<int> solution;
+	
 	for(int i = 1; i <= n; i++){
 		solution.push_back(i);
 	}
@@ -90,18 +97,105 @@ void generateInitialSolution(){
 		solution[randomIndex] = aux;
 	}
 
-	maxCost = getCost(solution);
+	return solution;
+}
+
+void decrementList(){
+	for (int i = 0; i < n; i++){
+		for (int j = i+1; j < n; j++){
+			if (tabooList[i][j] > 0){
+				tabooList[i][j] -= 1;
+			}
+		}
+	}
+}
+
+void localSearch(vector<int> &solution){
+	vector<int> swapSolution;
+	int cost = getCost(solution);
+
+	for(int i = 0; i < n; i++){
+		swapSolution.push_back(solution[i]);
+	}
+
+	bool flag = false;
+	for(int i = 0; i < n; i++){
+		for(int j = i+1; j < n; j++){
+			
+			if (objectiveAvals == 0){
+				return;
+			}
+
+			decrementList();
+
+			int aux = swapSolution[i];
+			swapSolution[i] = swapSolution[j];
+			swapSolution[j] = aux;
+
+			int swapSolutionCost = getCost(swapSolution);
+			objectiveAvals -= 1;
+			
+
+			if(tabooList[swapSolution[i]][swapSolution[j]] > 0){
+				if(swapSolutionCost > bestCost){
+					aux = swapSolution[i];
+					swapSolution[i] = swapSolution[j];
+					swapSolution[j] = aux;
+				}else{
+					bestSolution = swapSolution;
+					solution = swapSolution;
+					bestCost = swapSolutionCost;
+					cost = swapSolutionCost;
+				}
+
+				continue;
+			}
+
+			if(cost > swapSolutionCost){
+				flag = true;
+				solution = swapSolution;
+				cost = swapSolutionCost;
+			}else{
+				tabooList[swapSolution[j]][swapSolution[i]] = n;
+				aux = swapSolution[i];
+				swapSolution[i] = swapSolution[j];
+				swapSolution[j] = aux;
+			}
+		}
+
+		if(flag && i == n-1){
+			i = -1;
+			flag = false;
+		}
+	}
+}
+
+void perturbation(vector<int> &solution){
+	for(int i = 0; i < n; i++){
+		int randomIndex = i + rand()%(n-i);
+		int aux = solution[i];
+		solution[i] = solution[randomIndex];
+		solution[randomIndex] = aux;
+	}
 }
 
 void tabooSearch(){
+	vector<int> newSolution = bestSolution;
 
+	while(objectiveAvals != 0){
+		localSearch(newSolution);
+		perturbation(newSolution);
+	}
 }
 
 int main(int argc, char* argv[]){
 	readInstance(argv[1]);
+	objectiveAvals = strtol(argv[2], NULL, 10);
 	srand(time(NULL));
 
-	generateInitialSolution();
+	bestSolution = generateInitialSolution();
+	bestCost = getCost(bestSolution);
+	printf("First Cost: %i\n", bestCost);
 
 	// Contar o tempo comecando aqui
 	tabooSearch();
@@ -109,13 +203,13 @@ int main(int argc, char* argv[]){
 
 	printf("Best Solution = [");
 	//output << "Best Solution = [";
-	for(int i = 0; i < solution.size(); i++){
-		printf("%i, ", solution[i]);
+	for(int i = 0; i < bestSolution.size(); i++){
+		printf("%i, ", bestSolution[i]);
 		//output << solution[i];
 	}
 	printf("]\n");
-	printf("Cost: %i\n", maxCost);
-	// output << "Cost: " << maxCost << "\n";
+	printf("Cost: %i\n", bestCost);
+	// output << "Cost: " << bestCost << "\n";
 
 	return 0;
 }
