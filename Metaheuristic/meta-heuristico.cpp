@@ -2,7 +2,9 @@
 #include <time.h>
 #include <fstream>
 #include <vector>
+#include <chrono>
 
+using namespace std::chrono;
 using namespace std;
 
 int n;
@@ -195,11 +197,11 @@ int main(int argc, char* argv[]){
 
 	bestSolution = generateInitialSolution();
 	bestCost = getCost(bestSolution);
-	printf("First Cost: %i\n", bestCost);
 
-	// Contar o tempo comecando aqui
+	steady_clock::time_point t1 = steady_clock::now();
 	tabooSearch();
-	// Parar o tempo aqui
+	steady_clock::time_point t2 = steady_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
 	printf("Best Solution = [");
 	//output << "Best Solution = [";
@@ -208,8 +210,11 @@ int main(int argc, char* argv[]){
 		//output << solution[i];
 	}
 	printf("]\n");
+	// output << "]\n";
 	printf("Cost: %i\n", bestCost);
 	// output << "Cost: " << bestCost << "\n";
+	printf("Time: %lf seconds.\n", time_span.count());
+	// output << "Time: " << time_span.count() << "seconds.\n";
 
 	return 0;
 }
