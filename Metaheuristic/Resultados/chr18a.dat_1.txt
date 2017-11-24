@@ -1,3 +1,0 @@
-Best Solution = []
-Cost: 0
-Time: 1.134e-06seconds.

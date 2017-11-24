@@ -215,7 +215,7 @@ int main(int argc, char* argv[]){
 	output << "Best Solution = [";
 	for(int i = 0; i < bestSolution.size(); i++){
 		printf("%i, ", bestSolution[i]);
-		output << bestSolution[i];
+		output << bestSolution[i] << ", ";
 	}
 	printf("]\n");
 	output << "]\n";

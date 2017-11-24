@@ -1,22 +1,16 @@
 g++ -std=c++11 meta-heuristico.cpp -o meta-heuristico -O3
 ./chr12a.sh
 ./chr15a.sh
-./chr18a.sh
 ./chr20a.sh
-./chr22a.sh
 ./chr25a.sh
 ./esc16a.sh
 ./esc32a.sh
 ./esc64a.sh
 ./had16.sh
-./had18.sh
 ./had20.sh
-./kra30a.sh
-./kra30b.sh
 ./kra32.sh
 ./nug27.sh
 ./nug28.sh
-./nug30.sh
 ./rou12.sh
 ./rou15.sh
 ./rou20.sh
@@ -29,3 +23,9 @@ g++ -std=c++11 meta-heuristico.cpp -o meta-heuristico -O3
 ./tai15b.sh
 ./tai17a.sh
 ./tai20a.sh
+./tai20b.sh
+./tai25a.sh
+./tai25b.sh
+./tai30a.sh
+./tai30b.sh
+./tai35a.sh

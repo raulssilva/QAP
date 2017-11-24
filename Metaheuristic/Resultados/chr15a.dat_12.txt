@@ -1,3 +1,3 @@
-Best Solution = [578131214312691015114]
-Cost: 10708
-Time: 0.345867seconds.
+Best Solution = [5, 7, 8, 13, 1, 14, 2, 3, 10, 6, 9, 12, 15, 11, 4, ]
+Cost: 10760
+Time: 0.39975seconds.
