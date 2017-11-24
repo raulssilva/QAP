@@ -1,0 +1,3 @@
+Best Solution = [752181364314151091211]
+Cost: 11308
+Time: 0.348661seconds.

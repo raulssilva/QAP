@@ -192,29 +192,37 @@ void tabooSearch(){
 
 int main(int argc, char* argv[]){
 	readInstance(argv[1]);
-	objectiveAvals = strtol(argv[2], NULL, 10);
+	objectiveAvals = n*100000;
 	srand(time(NULL));
+
+	ofstream output;
+	string x = argv[1];
+	string y = argv[2];
+	string results = "./Resultados/" + x.substr(12) + "_" + y + ".txt";
+
+	output.open(results);
+
+	steady_clock::time_point t1 = steady_clock::now();
 
 	bestSolution = generateInitialSolution();
 	bestCost = getCost(bestSolution);
 
-	steady_clock::time_point t1 = steady_clock::now();
 	tabooSearch();
 	steady_clock::time_point t2 = steady_clock::now();
 	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
 
 	printf("Best Solution = [");
-	//output << "Best Solution = [";
+	output << "Best Solution = [";
 	for(int i = 0; i < bestSolution.size(); i++){
 		printf("%i, ", bestSolution[i]);
-		//output << solution[i];
+		output << bestSolution[i];
 	}
 	printf("]\n");
-	// output << "]\n";
+	output << "]\n";
 	printf("Cost: %i\n", bestCost);
-	// output << "Cost: " << bestCost << "\n";
+	output << "Cost: " << bestCost << "\n";
 	printf("Time: %lf seconds.\n", time_span.count());
-	// output << "Time: " << time_span.count() << "seconds.\n";
+	output << "Time: " << time_span.count() << "seconds.\n";
 
 	return 0;
 }
